@@ -11,39 +11,43 @@ class TakeHomeCalculator {
         this.percent = percent;
     }
 
-    Pair<Integer, String> netAmount(Pair<Integer, String> first, Pair<Integer, String>... rest) {
+    Money netAmount(Money first, Money... rest) {
 
-        List<Pair<Integer, String>> pairs = Arrays.asList(rest);
+        List<Money> monies = Arrays.asList(rest);
 
-        Pair<Integer, String> total = first;
+        Money total = first;
 
-        for (Pair<Integer, String> next : pairs) {
-            if (next.second != total.second) {
+        total = plus(monies, total);
+
+        Double amount = total.value * (percent / 100d);
+        Money tax = new Money(amount.intValue(), first.currency);
+
+        if (!total.currency.equals(tax.currency)) {
+            throw new Incalculable();
+        }
+        return new Money(total.value - tax.value, first.currency);
+    }
+
+    private Money plus(List<Money> monies, Money total) {
+        for (Money next : monies) {
+            if (!next.currency.equals(total.currency)) {
                 throw new Incalculable();
             }
         }
 
-        for (Pair<Integer, String> next : pairs) {
-            total = new Pair<>(total.first + next.first, next.second);
+        for (Money next : monies) {
+            total = new Money(total.value + next.value, next.currency);
         }
-
-        Double amount = total.first * (percent / 100d);
-        Pair<Integer, String> tax = new Pair<>(amount.intValue(), first.second);
-
-        if (total.second == tax.second) {
-            return new Pair<>(total.first - tax.first, first.second);
-        } else {
-            throw new Incalculable();
-        }
+        return total;
     }
 
-    static class Pair<A, B> {
-        final A first;
-        final B second;
+    static class Money {
+        final Integer value;
+        final String currency;
 
-        Pair(A first, B second) {
-            this.first = first;
-            this.second = second;
+        Money(Integer value, String currency) {
+            this.value = value;
+            this.currency = currency;
         }
 
     }
