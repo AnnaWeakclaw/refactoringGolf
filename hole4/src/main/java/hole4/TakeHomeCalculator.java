@@ -3,6 +3,8 @@ package hole4;
 import java.util.Arrays;
 import java.util.List;
 
+import static hole4.Money.*;
+
 class TakeHomeCalculator {
 
     private final int percent;
@@ -22,28 +24,8 @@ class TakeHomeCalculator {
         }
 
         Double amount = total.value * (percent / 100d);
-        Money tax = new Money(amount.intValue(), first.currency);
+        Money tax = money(amount.intValue(), first.currency);
 
-        if (!total.currency.equals(tax.currency)) {
-            throw new Incalculable();
-        }
-        return new Money(total.value - tax.value, first.currency);
-    }
-
-    static class Money {
-        final Integer value;
-        final String currency;
-
-        Money(Integer value, String currency) {
-            this.value = value;
-            this.currency = currency;
-        }
-
-        Money plus(Money other) {
-            if (!other.currency.equals(currency)) {
-                throw new Incalculable();
-            }
-            return new Money(value + other.value, other.currency);
-        }
+        return total.minus(tax);
     }
 }
